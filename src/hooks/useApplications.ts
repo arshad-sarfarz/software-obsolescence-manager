@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
@@ -50,8 +49,14 @@ export const useApplications = () => {
                 const server = getServerById(serverId);
                 if (!server) return null;
                 
+                // Transform mock server to match database schema
                 return {
-                  ...server,
+                  id: server.id,
+                  name: server.name,
+                  owner: server.owner,
+                  team: server.team,
+                  status: server.status.toLowerCase().replace(/ /g, '_') as Tables<'servers'>['status'],
+                  comments: server.comments,
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString(),
                 };
@@ -63,8 +68,17 @@ export const useApplications = () => {
                 const tech = getTechnologyById(techId);
                 if (!tech) return null;
                 
+                // Transform mock technology to match database schema
                 return {
-                  ...tech,
+                  id: tech.id,
+                  name: tech.name,
+                  version: tech.version,
+                  category: tech.category,
+                  support_status: tech.supportStatus as Tables<'technologies'>['support_status'],
+                  support_end_date: tech.supportEndDate,
+                  standard_support_end_date: tech.standardSupportEndDate || null,
+                  extended_support_end_date: tech.extendedSupportEndDate || null,
+                  extended_security_update_end_date: tech.extendedSecurityUpdateEndDate || null,
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString(),
                 };
@@ -72,7 +86,12 @@ export const useApplications = () => {
               .filter(Boolean) as Tables<'technologies'>[];
             
             return {
-              ...app,
+              id: app.id,
+              name: app.name,
+              description: app.description,
+              owner: app.owner,
+              team: app.team,
+              criticality: app.criticality.toLowerCase() as Application['criticality'],
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
               servers: mockServers,
