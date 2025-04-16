@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
@@ -43,16 +42,16 @@ export const useApplications = () => {
           const { applications: mockApps } = await import('@/data/mockData');
           const { getServerById, getTechnologyById } = await import('@/data/mockData');
           
-          const mockApplicationsWithRelations = mockApps.map(app => {
-            return {
-              ...app,
-              servers: app.servers.map(serverId => getServerById(serverId)).filter(Boolean),
-              technologies: app.technologies.map(techId => getTechnologyById(techId)).filter(Boolean)
-            };
-          });
+          const mockApplicationsWithRelations = mockApps.map(app => ({
+            ...app,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            servers: app.servers.map(serverId => getServerById(serverId)).filter(Boolean),
+            technologies: app.technologies.map(techId => getTechnologyById(techId)).filter(Boolean)
+          })) as ApplicationWithRelations[];
           
           console.log('Mock applications data:', mockApplicationsWithRelations);
-          return mockApplicationsWithRelations as ApplicationWithRelations[];
+          return mockApplicationsWithRelations;
         }
         
         // Transform the applications data
