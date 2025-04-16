@@ -11,7 +11,10 @@ interface ApplicationTableRowProps {
 }
 
 export function ApplicationTableRow({ app }: ApplicationTableRowProps) {
-  const hasEolTechnologies = app.technologies.some(tech => tech.support_status === 'EOL');
+  // Check if technologies exist and if any have EOL status
+  const hasEolTechnologies = app.technologies && 
+    Array.isArray(app.technologies) && 
+    app.technologies.some(tech => tech && tech.support_status === 'EOL');
 
   const getCriticalityBadge = (criticality: string) => {
     switch (criticality) {
@@ -42,7 +45,7 @@ export function ApplicationTableRow({ app }: ApplicationTableRowProps) {
       <TableCell>
         <div className="flex items-center space-x-1">
           <ServerIcon className="h-4 w-4 text-muted-foreground" />
-          <span>{app.servers.length}</span>
+          <span>{app.servers && Array.isArray(app.servers) ? app.servers.length : 0}</span>
         </div>
       </TableCell>
       <TableCell>

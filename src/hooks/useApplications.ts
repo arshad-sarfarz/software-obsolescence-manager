@@ -82,26 +82,55 @@ export const useApplications = () => {
         }
 
         try {
-          const transformedApps = applications.map(app => ({
-            ...app,
-            servers: app.servers && Array.isArray(app.servers) 
-              ? app.servers.map(s => s.server).filter(Boolean) 
-              : [],
-            technologies: app.technologies && Array.isArray(app.technologies) 
-              ? app.technologies.map(t => t.technology).filter(Boolean) 
-              : []
-          })) as ApplicationWithRelations[];
+          const transformedApps = applications.map(app => {
+            console.log('Transforming application:', app);
+            return {
+              ...app,
+              servers: app.servers && Array.isArray(app.servers) 
+                ? app.servers.map(s => s.server).filter(Boolean) 
+                : [],
+              technologies: app.technologies && Array.isArray(app.technologies) 
+                ? app.technologies.map(t => t.technology).filter(Boolean) 
+                : []
+            };
+          }) as ApplicationWithRelations[];
           
           console.log('Transformed applications:', transformedApps);
           return transformedApps;
         } catch (err) {
           console.error('Error transforming applications data:', err);
-          // Return basic applications if transformation fails
-          return basicApplications as ApplicationWithRelations[];
+          // If transformation fails, fall back to mock data
+          console.log('Falling back to mock data after transformation error');
+          const { applications } = await import('@/data/mockData');
+          
+          const mockApplicationsWithRelations = applications.map(app => {
+            const { getServerById, getTechnologyById } = require('@/data/mockData');
+            return {
+              ...app,
+              servers: app.servers.map(serverId => getServerById(serverId)).filter(Boolean),
+              technologies: app.technologies.map(techId => getTechnologyById(techId)).filter(Boolean)
+            };
+          });
+          
+          console.log('Using mock data after error:', mockApplicationsWithRelations);
+          return mockApplicationsWithRelations as ApplicationWithRelations[];
         }
       } catch (relationsError) {
-        console.error('Error fetching relations, falling back to basic applications:', relationsError);
-        return basicApplications as ApplicationWithRelations[];
+        console.error('Error fetching relations, falling back to mock data:', relationsError);
+        // Fall back to mock data if relations query fails
+        const { applications } = await import('@/data/mockData');
+          
+        const mockApplicationsWithRelations = applications.map(app => {
+          const { getServerById, getTechnologyById } = require('@/data/mockData');
+          return {
+            ...app,
+            servers: app.servers.map(serverId => getServerById(serverId)).filter(Boolean),
+            technologies: app.technologies.map(techId => getTechnologyById(techId)).filter(Boolean)
+          };
+        });
+        
+        console.log('Using mock data after error:', mockApplicationsWithRelations);
+        return mockApplicationsWithRelations as ApplicationWithRelations[];
       }
     }
   });

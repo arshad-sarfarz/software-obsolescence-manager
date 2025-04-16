@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApplications } from "@/hooks/useApplications";
 import { ApplicationsHeader } from "@/components/applications/ApplicationsHeader";
 import { ApplicationsSearch } from "@/components/applications/ApplicationsSearch";
@@ -12,22 +12,30 @@ export default function Applications() {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: applications = [], isLoading, error, isSuccess } = useApplications();
   
-  // When applications are loaded from mock data, show a toast notification
+  // State to track if we've already shown the mock data notification
   const [mockDataNotificationShown, setMockDataNotificationShown] = useState(false);
   
-  if (isSuccess && applications.length > 0 && !mockDataNotificationShown) {
-    // Check if we're using mock data by looking for mock IDs like 'a1', 'a2'
-    const usingMockData = applications.some(app => app.id.toString().match(/^a\d+$/));
-    
-    if (usingMockData) {
+  // Check if we're using mock data
+  const usingMockData = applications.length > 0 && 
+    applications.some(app => typeof app.id === 'string' && app.id.toString().match(/^a\d+$/));
+  
+  // Show toast notification only once when using mock data
+  useEffect(() => {
+    if (isSuccess && usingMockData && !mockDataNotificationShown) {
       setMockDataNotificationShown(true);
       toast({
         title: "Using demonstration data",
         description: "No application data found in the database. Showing sample data for demonstration.",
         variant: "default"
       });
+      console.log("Toast notification shown for mock data");
     }
-  }
+  }, [isSuccess, usingMockData, mockDataNotificationShown]);
+  
+  // Log application data for debugging
+  useEffect(() => {
+    console.log("Applications in component:", applications);
+  }, [applications]);
   
   // Filter applications based on search query
   const filteredApplications = applications.filter(app => 
@@ -36,6 +44,8 @@ export default function Applications() {
     app.team.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (app.description || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  console.log("Filtered applications:", filteredApplications);
 
   return (
     <div className="space-y-6">
@@ -72,7 +82,7 @@ export default function Applications() {
         </Alert>
       )}
       
-      {applications.length > 0 && applications.some(app => app.id.toString().match(/^a\d+$/)) && (
+      {usingMockData && (
         <Alert className="bg-blue-50 border-blue-200">
           <Info className="h-4 w-4 text-blue-500" />
           <AlertTitle>Using demonstration data</AlertTitle>
