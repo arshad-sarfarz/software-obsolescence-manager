@@ -7,10 +7,11 @@ import { ApplicationsTable } from "@/components/applications/ApplicationsTable";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2, Info } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 export default function Applications() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: applications = [], isLoading, error, isSuccess } = useApplications();
+  const { data: applications = [], isLoading, error, isError, refetch } = useApplications();
   
   // State to track if we've already shown the mock data notification
   const [mockDataNotificationShown, setMockDataNotificationShown] = useState(false);
@@ -21,21 +22,24 @@ export default function Applications() {
   
   // Show toast notification only once when using mock data
   useEffect(() => {
-    if (isSuccess && usingMockData && !mockDataNotificationShown) {
+    if (applications.length > 0 && usingMockData && !mockDataNotificationShown) {
       setMockDataNotificationShown(true);
       toast({
         title: "Using demonstration data",
         description: "No application data found in the database. Showing sample data for demonstration.",
         variant: "default"
       });
-      console.log("Toast notification shown for mock data");
     }
-  }, [isSuccess, usingMockData, mockDataNotificationShown]);
+  }, [applications, usingMockData, mockDataNotificationShown]);
   
-  // Log application data for debugging
+  // For debugging
   useEffect(() => {
     console.log("Applications in component:", applications);
-  }, [applications]);
+    console.log("Using mock data:", usingMockData);
+    console.log("Is loading:", isLoading);
+    console.log("Is error:", isError);
+    console.log("Error:", error);
+  }, [applications, usingMockData, isLoading, isError, error]);
   
   // Filter applications based on search query
   const filteredApplications = applications.filter(app => 
@@ -44,8 +48,6 @@ export default function Applications() {
     app.team.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (app.description || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  console.log("Filtered applications:", filteredApplications);
 
   return (
     <div className="space-y-6">
@@ -62,17 +64,24 @@ export default function Applications() {
         </div>
       )}
       
-      {error && (
+      {isError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Failed to load applications. Please try again later.
+          <AlertDescription className="space-y-2">
+            <div>Failed to load applications. Please try again later.</div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => refetch()}
+            >
+              Try Again
+            </Button>
           </AlertDescription>
         </Alert>
       )}
       
-      {!isLoading && !error && applications.length === 0 && (
+      {!isLoading && !isError && applications.length === 0 && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>No applications found</AlertTitle>
@@ -92,7 +101,7 @@ export default function Applications() {
         </Alert>
       )}
       
-      {!isLoading && !error && applications.length > 0 && (
+      {!isLoading && !isError && applications.length > 0 && (
         <ApplicationsTable applications={filteredApplications} />
       )}
     </div>

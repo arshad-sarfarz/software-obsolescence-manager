@@ -15,48 +15,8 @@ export const useApplications = () => {
     queryFn: async () => {
       console.log('Fetching applications...');
       
-      // First, try a simple query to fetch just the applications without relations
-      const { data: basicApplications, error: basicError } = await supabase
-        .from('applications')
-        .select('*');
-        
-      console.log('Basic applications query result:', basicApplications);
-      
-      if (basicError) {
-        console.error('Error fetching basic applications:', basicError);
-        throw basicError;
-      }
-      
-      if (!basicApplications || basicApplications.length === 0) {
-        console.log('No applications found in the database');
-        
-        // If we're not getting any applications data, let's try using the mock data
-        console.log('Falling back to mock data');
-        
-        // Import the mock data only if needed
-        const { applications } = await import('@/data/mockData');
-        
-        // Transform the mock data to match our expected format
-        const mockApplicationsWithRelations = applications.map(app => {
-          // For each application, fetch servers and technologies from mock data
-          const { getServerById, getTechnologyById } = require('@/data/mockData');
-          
-          return {
-            ...app,
-            servers: app.servers.map(serverId => getServerById(serverId)).filter(Boolean),
-            technologies: app.technologies.map(techId => getTechnologyById(techId)).filter(Boolean)
-          };
-        });
-        
-        console.log('Using mock data:', mockApplicationsWithRelations);
-        return mockApplicationsWithRelations as ApplicationWithRelations[];
-      }
-      
-      // If we have basic application data, try to fetch the relations
       try {
-        console.log('Fetching applications with relations...');
-        
-        // Now try the full query with relations
+        // First, try to fetch applications from Supabase
         const { data: applications, error } = await supabase
           .from('applications')
           .select(`
@@ -68,22 +28,36 @@ export const useApplications = () => {
               technology:technologies(*)
             )
           `);
-
+          
+        console.log('Applications query result:', applications);
+        
         if (error) {
-          console.error('Error fetching applications with relations:', error);
+          console.error('Error fetching applications:', error);
           throw error;
         }
-
-        console.log('Raw applications data with relations:', applications);
         
         if (!applications || applications.length === 0) {
-          console.log('No applications with relations found');
-          return [];
+          console.log('No applications found in the database, using mock data');
+          
+          // If no applications found, use mock data
+          const { applications: mockApps } = await import('@/data/mockData');
+          const { getServerById, getTechnologyById } = await import('@/data/mockData');
+          
+          const mockApplicationsWithRelations = mockApps.map(app => {
+            return {
+              ...app,
+              servers: app.servers.map(serverId => getServerById(serverId)).filter(Boolean),
+              technologies: app.technologies.map(techId => getTechnologyById(techId)).filter(Boolean)
+            };
+          });
+          
+          console.log('Mock applications data:', mockApplicationsWithRelations);
+          return mockApplicationsWithRelations as ApplicationWithRelations[];
         }
-
+        
+        // Transform the applications data
         try {
           const transformedApps = applications.map(app => {
-            console.log('Transforming application:', app);
             return {
               ...app,
               servers: app.servers && Array.isArray(app.servers) 
@@ -99,38 +73,11 @@ export const useApplications = () => {
           return transformedApps;
         } catch (err) {
           console.error('Error transforming applications data:', err);
-          // If transformation fails, fall back to mock data
-          console.log('Falling back to mock data after transformation error');
-          const { applications } = await import('@/data/mockData');
-          
-          const mockApplicationsWithRelations = applications.map(app => {
-            const { getServerById, getTechnologyById } = require('@/data/mockData');
-            return {
-              ...app,
-              servers: app.servers.map(serverId => getServerById(serverId)).filter(Boolean),
-              technologies: app.technologies.map(techId => getTechnologyById(techId)).filter(Boolean)
-            };
-          });
-          
-          console.log('Using mock data after error:', mockApplicationsWithRelations);
-          return mockApplicationsWithRelations as ApplicationWithRelations[];
+          throw new Error('Failed to process application data');
         }
-      } catch (relationsError) {
-        console.error('Error fetching relations, falling back to mock data:', relationsError);
-        // Fall back to mock data if relations query fails
-        const { applications } = await import('@/data/mockData');
-          
-        const mockApplicationsWithRelations = applications.map(app => {
-          const { getServerById, getTechnologyById } = require('@/data/mockData');
-          return {
-            ...app,
-            servers: app.servers.map(serverId => getServerById(serverId)).filter(Boolean),
-            technologies: app.technologies.map(techId => getTechnologyById(techId)).filter(Boolean)
-          };
-        });
-        
-        console.log('Using mock data after error:', mockApplicationsWithRelations);
-        return mockApplicationsWithRelations as ApplicationWithRelations[];
+      } catch (err) {
+        console.error('Error in applications query:', err);
+        throw err;
       }
     }
   });
@@ -140,33 +87,38 @@ export const useApplication = (id: string) => {
   return useQuery({
     queryKey: ['applications', id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('applications')
-        .select(`
-          *,
-          servers:application_servers(
-            server:servers(*)
-          ),
-          technologies:application_technologies(
-            technology:technologies(*)
-          )
-        `)
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        console.error(`Error fetching application ${id}:`, error);
-        throw error;
+      if (!id) {
+        throw new Error('Application ID is required');
       }
       
       try {
+        const { data, error } = await supabase
+          .from('applications')
+          .select(`
+            *,
+            servers:application_servers(
+              server:servers(*)
+            ),
+            technologies:application_technologies(
+              technology:technologies(*)
+            )
+          `)
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error(`Error fetching application ${id}:`, error);
+          throw error;
+        }
+        
+        // Transform the application data
         return {
           ...data,
           servers: data.servers ? data.servers.map(s => s.server) : [],
           technologies: data.technologies ? data.technologies.map(t => t.technology) : []
         } as ApplicationWithRelations;
       } catch (err) {
-        console.error('Error transforming application data:', err);
+        console.error(`Error in application query for ID ${id}:`, err);
         throw err;
       }
     },

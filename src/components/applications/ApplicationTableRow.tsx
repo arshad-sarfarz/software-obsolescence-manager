@@ -11,7 +11,12 @@ interface ApplicationTableRowProps {
 }
 
 export function ApplicationTableRow({ app }: ApplicationTableRowProps) {
-  // Check if technologies exist and if any have EOL status
+  if (!app) {
+    console.error('Application data is undefined or null');
+    return null;
+  }
+
+  // Safe check for technologies
   const hasEolTechnologies = app.technologies && 
     Array.isArray(app.technologies) && 
     app.technologies.some(tech => tech && tech.support_status === 'EOL');
@@ -35,13 +40,13 @@ export function ApplicationTableRow({ app }: ApplicationTableRowProps) {
     <TableRow className={hasEolTechnologies ? "bg-red-50" : ""}>
       <TableCell>
         <div>
-          <div className="font-medium">{app.name}</div>
-          <div className="text-xs text-muted-foreground">{app.description}</div>
+          <div className="font-medium">{app.name || 'Unnamed Application'}</div>
+          <div className="text-xs text-muted-foreground">{app.description || 'No description'}</div>
         </div>
       </TableCell>
-      <TableCell>{getCriticalityBadge(app.criticality)}</TableCell>
-      <TableCell>{app.owner}</TableCell>
-      <TableCell>{app.team}</TableCell>
+      <TableCell>{getCriticalityBadge(app.criticality || 'Unknown')}</TableCell>
+      <TableCell>{app.owner || 'Unassigned'}</TableCell>
+      <TableCell>{app.team || 'No team'}</TableCell>
       <TableCell>
         <div className="flex items-center space-x-1">
           <ServerIcon className="h-4 w-4 text-muted-foreground" />
