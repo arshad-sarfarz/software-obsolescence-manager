@@ -31,9 +31,17 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {applications.map((app) => (
-              <ApplicationTableRow key={app.id} app={app} />
-            ))}
+            {applications.length === 0 ? (
+              <TableRow>
+                <TableHead colSpan={7} className="text-center py-6 text-muted-foreground">
+                  No applications found matching your criteria
+                </TableHead>
+              </TableRow>
+            ) : (
+              applications.map((app) => (
+                <ApplicationTableRow key={app.id} app={app} />
+              ))
+            )}
           </TableBody>
         </Table>
       </CardContent>
