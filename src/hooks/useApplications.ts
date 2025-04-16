@@ -141,13 +141,17 @@ export const useOrphanedApplications = () => {
         // Get applications that don't have any servers or technologies
         const { data: orphanedApps, error } = await supabase
           .from('applications')
-          .select(`
-            *,
-            servers:application_servers(count),
-            technologies:application_technologies(count)
-          `)
-          .eq('servers.count', 0)
-          .eq('technologies.count', 0);
+          .select('*')
+          .not('id', 'in', (
+            supabase
+              .from('application_servers')
+              .select('application_id')
+          ))
+          .not('id', 'in', (
+            supabase
+              .from('application_technologies')
+              .select('application_id')
+          ));
         
         console.log('Orphaned applications query result:', orphanedApps);
         
@@ -156,48 +160,10 @@ export const useOrphanedApplications = () => {
           throw error;
         }
         
-        if (!orphanedApps || orphanedApps.length === 0) {
-          console.log('No orphaned applications found in the database, falling back to client-side filtering');
-          
-          // Fallback to client-side filtering if the direct query doesn't work
-          const { data: allApplications } = useApplications();
-          
-          if (!allApplications) {
-            return [];
-          }
-          
-          return allApplications.filter(
-            app => (!app.servers || app.servers.length === 0) && 
-                  (!app.technologies || app.technologies.length === 0)
-          );
-        }
-        
-        // Transform the applications data to match the expected format
-        const transformedApps = orphanedApps.map(app => {
-          return {
-            ...app,
-            servers: [],
-            technologies: []
-          };
-        }) as ApplicationWithRelations[];
-        
-        console.log('Transformed orphaned applications:', transformedApps);
-        return transformedApps;
+        return orphanedApps || [];
       } catch (err) {
         console.error('Error in orphaned applications query:', err);
-        
-        // Fallback to client-side filtering
-        console.log('Falling back to client-side filtering for orphaned applications');
-        const applicationsQuery = useApplications();
-        
-        if (applicationsQuery.data) {
-          return applicationsQuery.data.filter(
-            app => (!app.servers || app.servers.length === 0) && 
-                  (!app.technologies || app.technologies.length === 0)
-          );
-        }
-        
-        return [];
+        throw err;
       }
     }
   });
