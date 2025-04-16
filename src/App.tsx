@@ -12,6 +12,7 @@ import Remediations from "./pages/Remediations";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import OrphanedApplications from "./pages/OrphanedApplications";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/" element={<Dashboard />} />
             <Route path="/servers" element={<Servers />} />
             <Route path="/applications" element={<Applications />} />
+            <Route path="/applications/orphaned" element={<OrphanedApplications />} />
             <Route path="/technologies" element={<Technologies />} />
             <Route path="/remediations" element={<Remediations />} />
             <Route path="/reports" element={<Reports />} />
