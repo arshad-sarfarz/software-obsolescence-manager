@@ -12,19 +12,17 @@ interface OrphanedApplicationsTableProps {
 }
 
 export function OrphanedApplicationsTable({ applications }: OrphanedApplicationsTableProps) {
-  const orphanedApps = applications.filter(
-    app => (!app.servers || app.servers.length === 0) && (!app.technologies || app.technologies.length === 0)
-  );
+  // Data is already filtered in the useOrphanedApplications hook, so we use it directly
 
   const getCriticalityBadge = (criticality: string) => {
     switch (criticality) {
-      case 'Critical':
+      case 'critical':
         return <Badge className="bg-red-500">Critical</Badge>;
-      case 'High':
+      case 'high':
         return <Badge className="bg-orange-500">High</Badge>;
-      case 'Medium':
+      case 'medium':
         return <Badge className="bg-yellow-500">Medium</Badge>;
-      case 'Low':
+      case 'low':
         return <Badge className="bg-green-500">Low</Badge>;
       default:
         return <Badge>Unknown</Badge>;
@@ -51,14 +49,14 @@ export function OrphanedApplicationsTable({ applications }: OrphanedApplications
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orphanedApps.length === 0 ? (
+            {applications.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
                   No orphaned applications found
                 </TableCell>
               </TableRow>
             ) : (
-              orphanedApps.map((app) => (
+              applications.map((app) => (
                 <TableRow key={app.id}>
                   <TableCell>
                     <div>
