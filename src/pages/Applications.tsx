@@ -1,4 +1,3 @@
-
 import { 
   Table, 
   TableBody, 
@@ -16,26 +15,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { applications, getApplicationServers, getApplicationTechnologies } from "@/data/mockData";
 import { useState } from "react";
 import { MonitorPlay, MoreHorizontal, Search, AlertTriangle, Server as ServerIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useApplications } from "@/hooks/useApplications";
 
 export default function Applications() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: applications = [], isLoading } = useApplications();
   
   // Filter applications based on search query
   const filteredApplications = applications.filter(app => 
     app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     app.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
     app.team.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    app.description.toLowerCase().includes(searchQuery.toLowerCase())
+    (app.description || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Check if application has any EOL technologies
-  const hasEolTechnologies = (appId: string) => {
-    const technologies = getApplicationTechnologies(appId);
-    return technologies.some(tech => tech.supportStatus === 'EOL');
+  const hasEolTechnologies = (app: typeof applications[0]) => {
+    return app.technologies.some(tech => tech.support_status === 'EOL');
   };
   
   // Get criticality badge styling
@@ -98,8 +97,7 @@ export default function Applications() {
             </TableHeader>
             <TableBody>
               {filteredApplications.map((app) => {
-                const eolRisk = hasEolTechnologies(app.id);
-                const servers = getApplicationServers(app.id);
+                const eolRisk = hasEolTechnologies(app);
                 
                 return (
                   <TableRow key={app.id} className={eolRisk ? "bg-red-50" : ""}>
@@ -115,7 +113,7 @@ export default function Applications() {
                     <TableCell>
                       <div className="flex items-center space-x-1">
                         <ServerIcon className="h-4 w-4 text-muted-foreground" />
-                        <span>{servers.length}</span>
+                        <span>{app.servers.length}</span>
                       </div>
                     </TableCell>
                     <TableCell>
