@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { AlertTriangle, MoreHorizontal, ServerIcon } from "lucide-react";
+import { AlertTriangle, MoreHorizontal } from "lucide-react";
 
 interface ApplicationTableRowProps {
   app: ApplicationWithRelations;
@@ -16,7 +16,6 @@ export function ApplicationTableRow({ app }: ApplicationTableRowProps) {
     return null;
   }
 
-  // Safe check for technologies
   const hasEolTechnologies = app.technologies && 
     Array.isArray(app.technologies) && 
     app.technologies.some(tech => tech && tech.support_status === 'EOL');
@@ -47,12 +46,6 @@ export function ApplicationTableRow({ app }: ApplicationTableRowProps) {
       <TableCell>{getCriticalityBadge(app.criticality || 'Unknown')}</TableCell>
       <TableCell>{app.owner || 'Unassigned'}</TableCell>
       <TableCell>{app.team || 'No team'}</TableCell>
-      <TableCell>
-        <div className="flex items-center space-x-1">
-          <ServerIcon className="h-4 w-4 text-muted-foreground" />
-          <span>{app.servers && Array.isArray(app.servers) ? app.servers.length : 0}</span>
-        </div>
-      </TableCell>
       <TableCell>
         {hasEolTechnologies && (
           <div className="flex items-center text-destructive">

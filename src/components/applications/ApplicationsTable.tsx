@@ -25,7 +25,6 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
               <TableHead>Criticality</TableHead>
               <TableHead>Owner</TableHead>
               <TableHead>Team</TableHead>
-              <TableHead>Servers</TableHead>
               <TableHead>Risk</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
@@ -33,7 +32,7 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
           <TableBody>
             {applications.length === 0 ? (
               <TableRow>
-                <TableHead colSpan={7} className="text-center py-6 text-muted-foreground">
+                <TableHead colSpan={6} className="text-center py-6 text-muted-foreground">
                   No applications found matching your criteria
                 </TableHead>
               </TableRow>
