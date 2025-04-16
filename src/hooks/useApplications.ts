@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
@@ -16,18 +15,10 @@ export const useApplications = () => {
       console.log('Fetching applications...');
       
       try {
-        // First, try to fetch applications from Supabase
+        // Fetch only applications data without joins
         const { data: applications, error } = await supabase
           .from('applications')
-          .select(`
-            *,
-            servers:application_servers(
-              server:servers(*)
-            ),
-            technologies:application_technologies(
-              technology:technologies(*)
-            )
-          `);
+          .select('*');
           
         console.log('Applications query result:', applications);
         
@@ -43,7 +34,7 @@ export const useApplications = () => {
           const { applications: mockApps } = await import('@/data/mockData');
           const { getServerById, getTechnologyById } = await import('@/data/mockData');
           
-          // Create mock server and technology objects that match the database schema
+          // Create mock applications with relations that match the database schema
           const mockApplicationsWithRelations = mockApps.map(app => {
             const mockServers = app.servers
               .map(serverId => {
@@ -104,26 +95,15 @@ export const useApplications = () => {
           return mockApplicationsWithRelations;
         }
         
-        // Transform the applications data
-        try {
-          const transformedApps = applications.map(app => {
-            return {
-              ...app,
-              servers: app.servers && Array.isArray(app.servers) 
-                ? app.servers.map(s => s.server).filter(Boolean) 
-                : [],
-              technologies: app.technologies && Array.isArray(app.technologies) 
-                ? app.technologies.map(t => t.technology).filter(Boolean) 
-                : []
-            };
-          }) as ApplicationWithRelations[];
-          
-          console.log('Transformed applications:', transformedApps);
-          return transformedApps;
-        } catch (err) {
-          console.error('Error transforming applications data:', err);
-          throw new Error('Failed to process application data');
-        }
+        // Transform the applications data to include empty arrays for servers and technologies
+        const transformedApps = applications.map(app => ({
+          ...app,
+          servers: [],
+          technologies: []
+        })) as ApplicationWithRelations[];
+        
+        console.log('Transformed applications:', transformedApps);
+        return transformedApps;
       } catch (err) {
         console.error('Error in applications query:', err);
         throw err;
