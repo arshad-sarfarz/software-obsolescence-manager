@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
@@ -42,13 +43,42 @@ export const useApplications = () => {
           const { applications: mockApps } = await import('@/data/mockData');
           const { getServerById, getTechnologyById } = await import('@/data/mockData');
           
-          const mockApplicationsWithRelations = mockApps.map(app => ({
-            ...app,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            servers: app.servers.map(serverId => getServerById(serverId)).filter(Boolean),
-            technologies: app.technologies.map(techId => getTechnologyById(techId)).filter(Boolean)
-          })) as ApplicationWithRelations[];
+          // Create mock server and technology objects that match the database schema
+          const mockApplicationsWithRelations = mockApps.map(app => {
+            const mockServers = app.servers
+              .map(serverId => {
+                const server = getServerById(serverId);
+                if (!server) return null;
+                
+                return {
+                  ...server,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                };
+              })
+              .filter(Boolean) as Tables<'servers'>[];
+              
+            const mockTechnologies = app.technologies
+              .map(techId => {
+                const tech = getTechnologyById(techId);
+                if (!tech) return null;
+                
+                return {
+                  ...tech,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                };
+              })
+              .filter(Boolean) as Tables<'technologies'>[];
+            
+            return {
+              ...app,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              servers: mockServers,
+              technologies: mockTechnologies
+            } as ApplicationWithRelations;
+          });
           
           console.log('Mock applications data:', mockApplicationsWithRelations);
           return mockApplicationsWithRelations;
