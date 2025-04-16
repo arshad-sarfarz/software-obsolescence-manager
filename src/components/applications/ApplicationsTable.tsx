@@ -1,11 +1,11 @@
 
-import { Application } from "@/hooks/useApplications";
+import { ApplicationWithRelations } from "@/hooks/useApplications";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ApplicationTableRow } from "./ApplicationTableRow";
 
 interface ApplicationsTableProps {
-  applications: Application[];
+  applications: ApplicationWithRelations[];
 }
 
 export function ApplicationsTable({ applications }: ApplicationsTableProps) {
