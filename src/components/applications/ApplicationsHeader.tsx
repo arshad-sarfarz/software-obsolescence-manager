@@ -17,10 +17,12 @@ export function ApplicationsHeader() {
           </Link>
         </div>
       </div>
-      <Button>
-        <MonitorPlay className="mr-2 h-4 w-4" />
-        Add Application
-      </Button>
+      <Link to="/applications/create">
+        <Button>
+          <MonitorPlay className="mr-2 h-4 w-4" />
+          Add Application
+        </Button>
+      </Link>
     </div>
   );
 }
