@@ -20,30 +20,28 @@ import CreateApplication from "./pages/CreateApplication";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/servers" element={<Servers />} />
-              <Route path="/applications" element={<Applications />} />
-              <Route path="/applications/create" element={<CreateApplication />} />
-              <Route path="/applications/orphaned" element={<OrphanedApplications />} />
-              <Route path="/technologies" element={<Technologies />} />
-              <Route path="/remediations" element={<Remediations />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/settings" element={<Settings />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </React.StrictMode>
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/servers" element={<Servers />} />
+            <Route path="/applications" element={<Applications />} />
+            <Route path="/applications/create" element={<CreateApplication />} />
+            <Route path="/applications/orphaned" element={<OrphanedApplications />} />
+            <Route path="/technologies" element={<Technologies />} />
+            <Route path="/remediations" element={<Remediations />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
 );
 
 export default App;

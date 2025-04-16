@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useApplications } from "@/hooks/useApplications";
 import { ApplicationsHeader } from "@/components/applications/ApplicationsHeader";
 import { ApplicationsSearch } from "@/components/applications/ApplicationsSearch";

@@ -38,11 +38,15 @@ export default function CreateApplication() {
   const onSubmit = async (data: CreateApplicationForm) => {
     setIsSubmitting(true);
     try {
+      console.log('Submitting application data:', data);
       const { error } = await supabase
         .from('applications')
         .insert([data]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating application:', error);
+        throw error;
+      }
 
       toast({
         title: "Success",
