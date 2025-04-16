@@ -10,22 +10,28 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { toast } from "@/components/ui/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-interface CreateApplicationForm {
-  name: string;
-  description: string;
-  owner: string;
-  team: string;
-  criticality: "Low" | "Medium" | "High" | "Critical";
-}
+// Create a schema for form validation
+const formSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  description: z.string().optional(),
+  owner: z.string().min(2, "Owner name must be at least 2 characters"),
+  team: z.string().min(2, "Team name must be at least 2 characters"),
+  criticality: z.enum(["Low", "Medium", "High", "Critical"]),
+});
+
+type CreateApplicationForm = z.infer<typeof formSchema>;
 
 export default function CreateApplication() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<CreateApplicationForm>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -39,15 +45,17 @@ export default function CreateApplication() {
     setIsSubmitting(true);
     try {
       console.log('Submitting application data:', data);
-      const { error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from('applications')
-        .insert([data]);
+        .insert([data])
+        .select();
 
       if (error) {
         console.error('Error creating application:', error);
         throw error;
       }
 
+      console.log('Successfully created application:', insertedData);
       toast({
         title: "Success",
         description: "Application created successfully",
@@ -110,6 +118,7 @@ export default function CreateApplication() {
                       <Textarea 
                         placeholder="Enter application description" 
                         {...field} 
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -170,7 +179,14 @@ export default function CreateApplication() {
               />
 
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Application"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Application"
+                )}
               </Button>
             </form>
           </Form>
