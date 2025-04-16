@@ -1,5 +1,5 @@
 
-import { Application } from "@/hooks/useApplications";
+import { ApplicationWithRelations } from "@/hooks/useApplications";
 import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertTriangle, MoreHorizontal, ServerIcon } from "lucide-react";
 
 interface ApplicationTableRowProps {
-  app: Application;
+  app: ApplicationWithRelations;
 }
 
 export function ApplicationTableRow({ app }: ApplicationTableRowProps) {
