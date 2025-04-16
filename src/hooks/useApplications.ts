@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
@@ -160,7 +161,14 @@ export const useOrphanedApplications = () => {
           throw error;
         }
         
-        return orphanedApps || [];
+        // Transform the data to match ApplicationWithRelations by adding empty arrays
+        const transformedData = (orphanedApps || []).map(app => ({
+          ...app,
+          servers: [] as Tables<'servers'>[],
+          technologies: [] as Tables<'technologies'>[]
+        })) as ApplicationWithRelations[];
+        
+        return transformedData;
       } catch (err) {
         console.error('Error in orphaned applications query:', err);
         throw err;
