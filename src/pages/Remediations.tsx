@@ -1,4 +1,3 @@
-
 import { 
   Table, 
   TableBody, 
@@ -21,11 +20,23 @@ import { useState } from "react";
 import { AlertTriangle, MoreHorizontal, Search, Server, Database, Calendar, User } from "lucide-react";
 import { RemediationStatusBadge } from "@/components/ui/remediation-status-badge";
 import { SupportStatusBadge } from "@/components/ui/support-status-badge";
+import { useRemediations } from "@/hooks/useRemediations";
+import { RemediationModal } from "@/components/remediations/RemediationModal";
+import { Pencil, Trash2, PlusCircle } from "lucide-react";
 
 export default function Remediations() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRemediation, setSelectedRemediation] = useState<Remediation | undefined>(undefined);
   
-  // Filter remediations based on search query
+  const { 
+    remediations, 
+    isLoading, 
+    createRemediation, 
+    updateRemediation,
+    deleteRemediation 
+  } = useRemediations();
+  
   const filteredRemediations = remediations.filter(remediation => {
     const server = getServerById(remediation.serverId);
     const technology = getTechnologyById(remediation.technologyId);
@@ -39,7 +50,6 @@ export default function Remediations() {
     );
   });
 
-  // Calculate days until target date
   const calculateDaysUntil = (dateString?: string) => {
     if (!dateString) return null;
     
@@ -49,13 +59,30 @@ export default function Remediations() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
-  
+
+  const handleCreate = (data: Omit<Remediation, 'id'>) => {
+    createRemediation(data);
+  };
+
+  const handleUpdate = (data: Omit<Remediation, 'id'> & { id: string }) => {
+    updateRemediation(data);
+  };
+
+  const handleDelete = (id: string) => {
+    deleteRemediation(id);
+  };
+
+  const openEditModal = (remediation: Remediation) => {
+    setSelectedRemediation(remediation);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Remediations</h2>
-        <Button>
-          <AlertTriangle className="mr-2 h-4 w-4" />
+        <Button onClick={() => setIsModalOpen(true)}>
+          <PlusCircle className="mr-2 h-4 w-4" />
           Add Remediation
         </Button>
       </div>
@@ -99,11 +126,7 @@ export default function Remediations() {
                 const daysUntilTarget = calculateDaysUntil(remediation.targetCompletionDate);
                 
                 return (
-                  <TableRow key={remediation.id} className={
-                    remediation.status === 'Not started' && daysUntilTarget !== null && daysUntilTarget < 30 
-                      ? "bg-red-50" 
-                      : ""
-                  }>
+                  <TableRow key={remediation.id}>
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <Server className="h-4 w-4 text-muted-foreground" />
@@ -166,6 +189,24 @@ export default function Remediations() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => openEditModal(remediation)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleDelete(remediation.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -173,6 +214,18 @@ export default function Remediations() {
           </Table>
         </CardContent>
       </Card>
+      <RemediationModal 
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedRemediation(undefined);
+        }}
+        remediation={selectedRemediation}
+        onSubmit={selectedRemediation 
+          ? (data) => handleUpdate({ ...data, id: selectedRemediation.id }) 
+          : handleCreate
+        }
+      />
     </div>
   );
 }
