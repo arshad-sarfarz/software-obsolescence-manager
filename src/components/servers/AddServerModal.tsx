@@ -25,10 +25,25 @@ type ServerFormData = {
 
 export function AddServerModal() {
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ServerFormData>();
 
   const onSubmit = async (data: ServerFormData) => {
     try {
+      setIsSubmitting(true);
+      
+      // Check if user is authenticated first
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData.session) {
+        toast({
+          title: "Authentication Error",
+          description: "You must be signed in to add a server",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       const { error } = await supabase
         .from('servers')
         .insert([{
@@ -48,11 +63,14 @@ export function AddServerModal() {
       setOpen(false);
       reset();
     } catch (error) {
+      console.error("Error creating server:", error);
       toast({
         title: "Error",
-        description: "Failed to create server",
+        description: error instanceof Error ? error.message : "Failed to create server",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -103,7 +121,9 @@ export function AddServerModal() {
             <Label htmlFor="comments">Comments</Label>
             <Textarea id="comments" {...register("comments")} />
           </div>
-          <Button type="submit" className="w-full">Create Server</Button>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create Server"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
