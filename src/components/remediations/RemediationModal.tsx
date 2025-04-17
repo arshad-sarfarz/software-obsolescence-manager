@@ -40,7 +40,7 @@ const remediationSchema = z.object({
   targetCompletionDate: z.string().min(1, "Target completion date is required"),
   actualCompletionDate: z.string().optional(),
   remediationType: z.enum(["Upgrade", "Migration", "Decommission", "Other"]),
-  comments: z.string().optional()
+  comments: z.string().default("")
 });
 
 interface RemediationModalProps {
@@ -59,23 +59,40 @@ export function RemediationModal({
   const form = useForm<z.infer<typeof remediationSchema>>({
     resolver: zodResolver(remediationSchema),
     defaultValues: remediation ? {
-      serverId: remediation.serverId || undefined,
-      technologyId: remediation.technologyId || undefined,
+      serverId: remediation.serverId || "",
+      technologyId: remediation.technologyId || "",
       status: remediation.status,
       assignedTo: remediation.assignedTo,
-      startDate: remediation.startDate || undefined,
+      startDate: remediation.startDate || "",
       targetCompletionDate: remediation.targetCompletionDate,
-      actualCompletionDate: remediation.actualCompletionDate || undefined,
+      actualCompletionDate: remediation.actualCompletionDate || "",
       remediationType: remediation.remediationType,
-      comments: remediation.comments || undefined
+      comments: remediation.comments || ""
     } : {
       status: "Not started",
-      remediationType: "Other"
+      remediationType: "Other",
+      serverId: "",
+      technologyId: "",
+      assignedTo: "",
+      targetCompletionDate: "",
+      comments: ""
     }
   });
 
   const handleSubmit = (data: z.infer<typeof remediationSchema>) => {
-    onSubmit(data);
+    const remediation: Omit<Remediation, 'id'> = {
+      serverId: data.serverId || "",
+      technologyId: data.technologyId || "",
+      status: data.status,
+      assignedTo: data.assignedTo,
+      startDate: data.startDate,
+      targetCompletionDate: data.targetCompletionDate,
+      actualCompletionDate: data.actualCompletionDate,
+      remediationType: data.remediationType,
+      comments: data.comments || ""
+    };
+    
+    onSubmit(remediation);
     onClose();
   };
 
@@ -102,7 +119,7 @@ export function RemediationModal({
                 <FormItem>
                   <FormLabel>Server ID</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter server ID" {...field} />
+                    <Input placeholder="Enter server ID" {...field} value={field.value || ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -116,7 +133,7 @@ export function RemediationModal({
                 <FormItem>
                   <FormLabel>Technology ID</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter technology ID" {...field} />
+                    <Input placeholder="Enter technology ID" {...field} value={field.value || ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -211,7 +228,7 @@ export function RemediationModal({
                 <FormItem>
                   <FormLabel>Comments</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter comments" {...field} />
+                    <Input placeholder="Enter comments" {...field} value={field.value || ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

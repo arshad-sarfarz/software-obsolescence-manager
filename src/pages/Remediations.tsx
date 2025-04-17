@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { remediations, getServerById, getTechnologyById } from "@/data/mockData";
+import { remediations as mockRemediations, getServerById, getTechnologyById } from "@/data/mockData";
 import { useState } from "react";
 import { AlertTriangle, MoreHorizontal, Search, Server, Database, Calendar, User } from "lucide-react";
 import { RemediationStatusBadge } from "@/components/ui/remediation-status-badge";
@@ -23,6 +23,7 @@ import { SupportStatusBadge } from "@/components/ui/support-status-badge";
 import { useRemediations } from "@/hooks/useRemediations";
 import { RemediationModal } from "@/components/remediations/RemediationModal";
 import { Pencil, Trash2, PlusCircle } from "lucide-react";
+import { Remediation } from "@/types";
 
 export default function Remediations() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,7 +38,7 @@ export default function Remediations() {
     deleteRemediation 
   } = useRemediations();
   
-  const filteredRemediations = remediations.filter(remediation => {
+  const filteredRemediations = remediations?.filter(remediation => {
     const server = getServerById(remediation.serverId);
     const technology = getTechnologyById(remediation.technologyId);
     
@@ -48,7 +49,7 @@ export default function Remediations() {
       remediation.remediationType.toLowerCase().includes(searchQuery.toLowerCase()) ||
       remediation.status.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  });
+  }) || [];
 
   const calculateDaysUntil = (dateString?: string) => {
     if (!dateString) return null;
@@ -130,14 +131,14 @@ export default function Remediations() {
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <Server className="h-4 w-4 text-muted-foreground" />
-                        <span>{server?.name}</span>
+                        <span>{server?.name || 'Unknown'}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
                         <div className="flex items-center space-x-2">
                           <Database className="h-4 w-4 text-muted-foreground" />
-                          <span>{technology?.name} {technology?.version}</span>
+                          <span>{technology?.name || 'Unknown'} {technology?.version}</span>
                         </div>
                         {technology && (
                           <div className="mt-1">
