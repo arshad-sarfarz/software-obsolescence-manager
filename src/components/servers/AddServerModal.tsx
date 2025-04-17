@@ -12,14 +12,48 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Server } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+type ServerFormData = {
+  name: string;
+  owner: string;
+  team: string;
+  comments?: string;
+};
 
 export function AddServerModal() {
   const [open, setOpen] = useState(false);
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<ServerFormData>();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement server creation logic
-    setOpen(false);
+  const onSubmit = async (data: ServerFormData) => {
+    try {
+      const { error } = await supabase
+        .from('servers')
+        .insert([{
+          name: data.name,
+          owner: data.owner,
+          team: data.team,
+          comments: data.comments,
+          status: 'Active'
+        }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Server has been created successfully",
+      });
+      setOpen(false);
+      reset();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create server",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -34,22 +68,40 @@ export function AddServerModal() {
         <DialogHeader>
           <DialogTitle>Add New Server</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Server Name</Label>
-            <Input id="name" required />
+            <Input 
+              id="name" 
+              {...register("name", { required: "Server name is required" })}
+            />
+            {errors.name && (
+              <p className="text-sm text-red-500">{errors.name.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="owner">Owner</Label>
-            <Input id="owner" required />
+            <Input 
+              id="owner" 
+              {...register("owner", { required: "Owner is required" })}
+            />
+            {errors.owner && (
+              <p className="text-sm text-red-500">{errors.owner.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="team">Team</Label>
-            <Input id="team" required />
+            <Input 
+              id="team" 
+              {...register("team", { required: "Team is required" })}
+            />
+            {errors.team && (
+              <p className="text-sm text-red-500">{errors.team.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="comments">Comments</Label>
-            <Textarea id="comments" />
+            <Textarea id="comments" {...register("comments")} />
           </div>
           <Button type="submit" className="w-full">Create Server</Button>
         </form>
