@@ -37,21 +37,28 @@ type ServerTechnology = {
 export default function Servers() {
   const [searchQuery, setSearchQuery] = useState("");
   
-  const { data: serversData = [], isLoading } = useQuery({
+  const { data: serversData = [], isLoading: isLoadingServers } = useQuery({
     queryKey: ['servers'],
     queryFn: async () => {
+      console.log("Fetching servers...");
       const { data, error } = await supabase
         .from('servers')
         .select('*');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching servers:", error);
+        throw error;
+      }
+      
+      console.log("Servers data:", data);
       return data as SupabaseServer[];
     }
   });
 
-  const { data: serverTechnologies = [] } = useQuery({
+  const { data: serverTechnologies = [], isLoading: isLoadingTechnologies } = useQuery({
     queryKey: ['server-technologies'],
     queryFn: async () => {
+      console.log("Fetching server technologies...");
       const { data, error } = await supabase
         .from('server_technologies')
         .select(`
@@ -61,14 +68,25 @@ export default function Servers() {
             name,
             version,
             category,
-            support_status
+            support_status,
+            support_end_date,
+            standard_support_end_date,
+            extended_support_end_date,
+            extended_security_update_end_date
           )
         `);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching server technologies:", error);
+        throw error;
+      }
+      
+      console.log("Server technologies data:", data);
       return data as ServerTechnology[];
     }
   });
+
+  const isLoading = isLoadingServers || isLoadingTechnologies;
 
   // Convert database entities to application types
   const servers: Server[] = serversData.map(server => ({
@@ -140,7 +158,7 @@ export default function Servers() {
         <CardContent>
           {isLoading ? (
             <div className="text-center py-4">Loading servers...</div>
-          ) : (
+          ) : filteredServers.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -210,6 +228,10 @@ export default function Servers() {
                 })}
               </TableBody>
             </Table>
+          ) : (
+            <div className="text-center py-4">
+              No servers found. {searchQuery ? "Try adjusting your search." : "Add a server to get started."}
+            </div>
           )}
         </CardContent>
       </Card>
