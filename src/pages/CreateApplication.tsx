@@ -45,9 +45,19 @@ export default function CreateApplication() {
     setIsSubmitting(true);
     try {
       console.log('Submitting application data:', data);
+      
+      // Ensure all required fields have values and handle optional description field
+      const applicationData = {
+        name: data.name,
+        description: data.description || null, // Convert empty string to null if needed
+        owner: data.owner,
+        team: data.team,
+        criticality: data.criticality
+      };
+      
       const { data: insertedData, error } = await supabase
         .from('applications')
-        .insert([data])
+        .insert([applicationData])
         .select();
 
       if (error) {
