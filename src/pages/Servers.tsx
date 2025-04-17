@@ -23,12 +23,21 @@ import { SupportStatusBadge } from "@/components/ui/support-status-badge";
 import { AddServerModal } from "@/components/servers/AddServerModal";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Server, Technology } from "@/types";
+import { Server, Technology, SupportStatus } from "@/types";
+import type { Tables } from "@/integrations/supabase/types";
+
+// Define types to match Supabase structure
+type SupabaseServer = Tables<'servers'>;
+type SupabaseTechnology = Tables<'technologies'>;
+type ServerTechnology = {
+  server_id: string;
+  technology: SupabaseTechnology;
+};
 
 export default function Servers() {
   const [searchQuery, setSearchQuery] = useState("");
   
-  const { data: servers = [], isLoading } = useQuery({
+  const { data: serversData = [], isLoading } = useQuery({
     queryKey: ['servers'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -36,7 +45,7 @@ export default function Servers() {
         .select('*');
       
       if (error) throw error;
-      return data as Server[];
+      return data as SupabaseServer[];
     }
   });
 
@@ -57,19 +66,43 @@ export default function Servers() {
         `);
       
       if (error) throw error;
-      return data;
+      return data as ServerTechnology[];
     }
   });
+
+  // Convert database entities to application types
+  const servers: Server[] = serversData.map(server => ({
+    id: server.id,
+    name: server.name,
+    status: server.status,
+    owner: server.owner,
+    team: server.team,
+    comments: server.comments || "",
+    technologies: [] // Will be populated by getServerTechnologies
+  }));
 
   const getServerTechnologies = (serverId: string): Technology[] => {
     return serverTechnologies
       .filter(st => st.server_id === serverId)
-      .map(st => st.technology as Technology);
+      .map(st => {
+        const techData = st.technology;
+        return {
+          id: techData.id,
+          name: techData.name,
+          version: techData.version,
+          category: techData.category,
+          supportStatus: techData.support_status as SupportStatus,
+          supportEndDate: techData.support_end_date || "", // Using a default empty string
+          standardSupportEndDate: techData.standard_support_end_date || undefined,
+          extendedSupportEndDate: techData.extended_support_end_date || undefined,
+          extendedSecurityUpdateEndDate: techData.extended_security_update_end_date || undefined
+        };
+      });
   };
 
   const hasEolTechnologies = (serverId: string) => {
     const technologies = getServerTechnologies(serverId);
-    return technologies.some(tech => tech.support_status === 'EOL');
+    return technologies.some(tech => tech.supportStatus === 'EOL');
   };
   
   const filteredServers = servers.filter(server => 
@@ -138,7 +171,7 @@ export default function Servers() {
                           {technologies.slice(0, 2).map((tech) => (
                             <SupportStatusBadge 
                               key={tech.id} 
-                              status={tech.support_status} 
+                              status={tech.supportStatus} 
                               className="text-xs"
                             />
                           ))}
