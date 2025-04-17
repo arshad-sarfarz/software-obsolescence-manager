@@ -1,4 +1,3 @@
-
 import { 
   Table, 
   TableBody, 
@@ -21,18 +20,17 @@ import { useState } from "react";
 import { Server as ServerIcon, MoreHorizontal, Search, AlertTriangle } from "lucide-react";
 import { ServerStatusBadge } from "@/components/ui/server-status-badge";
 import { SupportStatusBadge } from "@/components/ui/support-status-badge";
+import { AddServerModal } from "@/components/servers/AddServerModal";
 
 export default function Servers() {
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Filter servers based on search query
   const filteredServers = servers.filter(server => 
     server.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     server.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
     server.team.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Check if server has any EOL technologies
   const hasEolTechnologies = (serverId: string) => {
     const technologies = getServerTechnologies(serverId);
     return technologies.some(tech => tech.supportStatus === 'EOL');
@@ -42,10 +40,7 @@ export default function Servers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Servers</h2>
-        <Button>
-          <ServerIcon className="mr-2 h-4 w-4" />
-          Add Server
-        </Button>
+        <AddServerModal />
       </div>
       
       <div className="flex items-center space-x-2">

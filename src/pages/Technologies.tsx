@@ -1,4 +1,3 @@
-
 import { 
   Table, 
   TableBody, 
@@ -20,6 +19,7 @@ import { technologies, getRemediationsForTechnology } from "@/data/mockData";
 import { useState } from "react";
 import { Database, MoreHorizontal, Search, Clock } from "lucide-react";
 import { SupportStatusBadge } from "@/components/ui/support-status-badge";
+import { AddTechnologyModal } from "@/components/technologies/AddTechnologyModal";
 
 export default function Technologies() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,10 +44,7 @@ export default function Technologies() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Technologies</h2>
-        <Button>
-          <Database className="mr-2 h-4 w-4" />
-          Add Technology
-        </Button>
+        <AddTechnologyModal />
       </div>
       
       <div className="flex items-center space-x-2">

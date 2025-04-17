@@ -1,7 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import { MonitorPlay } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AddApplicationModal } from "./AddApplicationModal";
 
 export function ApplicationsHeader() {
   return (
@@ -17,12 +17,7 @@ export function ApplicationsHeader() {
           </Link>
         </div>
       </div>
-      <Link to="/applications/create">
-        <Button>
-          <MonitorPlay className="mr-2 h-4 w-4" />
-          Add Application
-        </Button>
-      </Link>
+      <AddApplicationModal />
     </div>
   );
 }
