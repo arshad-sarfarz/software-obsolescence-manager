@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,10 +53,10 @@ export default function Auth() {
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       <div 
-        className="absolute inset-0 z-0 bg-cover bg-center opacity-20" 
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-30" 
         style={{ 
-          backgroundImage: 'url(https://images.unsplash.com/photo-1498050108023-c5249f4df085)', 
-          filter: 'grayscale(30%) brightness(50%)' 
+          backgroundImage: 'url(https://colorlib.com/wp-content/uploads/sites/2/Pixova-Lite.jpg.webp)', 
+          filter: 'grayscale(20%) brightness(50%)' 
         }}
       />
       
