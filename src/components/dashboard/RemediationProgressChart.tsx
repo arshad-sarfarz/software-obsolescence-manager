@@ -1,41 +1,55 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { calculateStatistics } from "@/data/mockData";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function RemediationProgressChart() {
-  const stats = calculateStatistics();
+  const { remediationStatusCounts } = useDashboardData();
   
-  const remediationData = [
-    { name: 'Not Started', value: stats.remediationStats.byStatus.NotStarted },
-    { name: 'In Progress', value: stats.remediationStats.byStatus.InProgress },
-    { name: 'Completed', value: stats.remediationStats.byStatus.Completed },
+  const data = [
+    { name: "Not Started", value: remediationStatusCounts["Not started"], color: "#ef4444" },
+    { name: "In Progress", value: remediationStatusCounts["In progress"], color: "#f59e0b" },
+    { name: "Completed", value: remediationStatusCounts["Completed"], color: "#22c55e" },
   ];
+
+  const isLoading = !remediationStatusCounts;
+  const isEmpty = data.every(item => item.value === 0);
 
   return (
     <Card className="col-span-3">
       <CardHeader>
         <CardTitle>Remediation Progress</CardTitle>
-        <CardDescription>Status of remediation activities</CardDescription>
+        <CardDescription>
+          Status of all remediation activities
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart
-            data={remediationData}
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="value" fill="#6366f1" />
-          </BarChart>
-        </ResponsiveContainer>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-[300px]">
+            <Skeleton className="h-[250px] w-full" />
+          </div>
+        ) : isEmpty ? (
+          <div className="flex justify-center items-center h-[300px]">
+            <p className="text-muted-foreground">No remediation data available</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip
+                formatter={(value) => [`${value} remediations`, 'Count']}
+              />
+              <Bar dataKey="value" name="Count">
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   );

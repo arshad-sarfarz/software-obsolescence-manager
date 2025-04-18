@@ -1,67 +1,91 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { calculateStatistics } from "@/data/mockData";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function SupportProgressCards() {
-  const stats = calculateStatistics();
+  const { supportStatusCounts } = useDashboardData();
+  
+  const isLoading = !supportStatusCounts;
+  
+  // Calculate total and percentages
+  const total = 
+    supportStatusCounts.EOL +
+    supportStatusCounts.SS +
+    supportStatusCounts.ES +
+    supportStatusCounts.ESU;
+    
+  const percentEOL = total > 0 ? Math.round((supportStatusCounts.EOL / total) * 100) : 0;
+  const percentSS = total > 0 ? Math.round((supportStatusCounts.SS / total) * 100) : 0;
+  const percentES = total > 0 ? Math.round((supportStatusCounts.ES / total) * 100) : 0;
+  const percentESU = total > 0 ? Math.round((supportStatusCounts.ESU / total) * 100) : 0;
 
   return (
     <>
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">
-            Standard Support
-          </CardTitle>
+          <CardTitle>EOL Technologies</CardTitle>
+          <CardDescription>
+            End of Life - Immediate attention required
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.techStats.byStatus.SS}</div>
-          <p className="text-xs text-muted-foreground">
-            Technologies under standard support
-          </p>
-          <div className="mt-4 h-2 w-full">
-            <Progress value={stats.techStats.byStatus.SS / stats.techStats.total * 100} className="bg-gray-200 h-2">
-              <div className="h-full bg-green-500 rounded-full"></div>
-            </Progress>
-          </div>
+          {isLoading ? (
+            <Skeleton className="h-4 w-full mb-2" />
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl font-bold">{supportStatusCounts.EOL}</span>
+                <span className="text-muted-foreground">{percentEOL}%</span>
+              </div>
+              <Progress value={percentEOL} className="bg-gray-200 h-2" indicatorClassName="bg-red-500" />
+            </>
+          )}
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">
-            Extended Support
-          </CardTitle>
+          <CardTitle>Standard Support</CardTitle>
+          <CardDescription>
+            Technologies in standard support phase
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.techStats.byStatus.ES}</div>
-          <p className="text-xs text-muted-foreground">
-            Technologies under extended support
-          </p>
-          <div className="mt-4 h-2 w-full">
-            <Progress value={stats.techStats.byStatus.ES / stats.techStats.total * 100} className="bg-gray-200 h-2">
-              <div className="h-full bg-yellow-500 rounded-full"></div>
-            </Progress>
-          </div>
+          {isLoading ? (
+            <Skeleton className="h-4 w-full mb-2" />
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl font-bold">{supportStatusCounts.SS}</span>
+                <span className="text-muted-foreground">{percentSS}%</span>
+              </div>
+              <Progress value={percentSS} className="bg-gray-200 h-2" indicatorClassName="bg-green-500" />
+            </>
+          )}
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">
-            Extended Security Updates
-          </CardTitle>
+          <CardTitle>Extended Support</CardTitle>
+          <CardDescription>
+            Technologies in extended support phase
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.techStats.byStatus.ESU}</div>
-          <p className="text-xs text-muted-foreground">
-            Technologies with extended security updates
-          </p>
-          <div className="mt-4 h-2 w-full">
-            <Progress value={stats.techStats.byStatus.ESU / stats.techStats.total * 100} className="bg-gray-200 h-2">
-              <div className="h-full bg-blue-500 rounded-full"></div>
-            </Progress>
-          </div>
+          {isLoading ? (
+            <Skeleton className="h-4 w-full mb-2" />
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl font-bold">{supportStatusCounts.ES + supportStatusCounts.ESU}</span>
+                <span className="text-muted-foreground">{percentES + percentESU}%</span>
+              </div>
+              <Progress value={percentES + percentESU} className="bg-gray-200 h-2" indicatorClassName="bg-amber-500" />
+            </>
+          )}
         </CardContent>
       </Card>
     </>
