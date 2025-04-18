@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 export function SupportProgressCards() {
   const { supportStatusCounts } = useDashboardData();
@@ -39,7 +40,7 @@ export function SupportProgressCards() {
                 <span className="text-2xl font-bold">{supportStatusCounts.EOL}</span>
                 <span className="text-muted-foreground">{percentEOL}%</span>
               </div>
-              <Progress value={percentEOL} className="bg-gray-200 h-2" indicatorClassName="bg-red-500" />
+              <Progress value={percentEOL} className={cn("bg-gray-200 h-2", "data-[value]:bg-red-500")} />
             </>
           )}
         </CardContent>
@@ -61,7 +62,7 @@ export function SupportProgressCards() {
                 <span className="text-2xl font-bold">{supportStatusCounts.SS}</span>
                 <span className="text-muted-foreground">{percentSS}%</span>
               </div>
-              <Progress value={percentSS} className="bg-gray-200 h-2" indicatorClassName="bg-green-500" />
+              <Progress value={percentSS} className={cn("bg-gray-200 h-2", "data-[value]:bg-green-500")} />
             </>
           )}
         </CardContent>
@@ -83,7 +84,7 @@ export function SupportProgressCards() {
                 <span className="text-2xl font-bold">{supportStatusCounts.ES + supportStatusCounts.ESU}</span>
                 <span className="text-muted-foreground">{percentES + percentESU}%</span>
               </div>
-              <Progress value={percentES + percentESU} className="bg-gray-200 h-2" indicatorClassName="bg-amber-500" />
+              <Progress value={percentES + percentESU} className={cn("bg-gray-200 h-2", "data-[value]:bg-amber-500")} />
             </>
           )}
         </CardContent>
