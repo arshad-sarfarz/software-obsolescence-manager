@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,8 +50,16 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-secondary/5 p-4">
-      <div className="w-full max-w-md text-center mb-8">
+    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-20" 
+        style={{ 
+          backgroundImage: 'url(https://images.unsplash.com/photo-1498050108023-c5249f4df085)', 
+          filter: 'grayscale(30%) brightness(50%)' 
+        }}
+      />
+      
+      <div className="relative z-10 w-full max-w-md text-center mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           Software Obsolescence Manager
         </h1>
@@ -61,7 +68,7 @@ export default function Auth() {
         </p>
       </div>
       
-      <Card className="w-full max-w-md border-0 shadow-lg">
+      <Card className="relative z-10 w-full max-w-md border-0 shadow-2xl backdrop-blur-sm bg-white/70 dark:bg-black/70">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">
             {isSignUp ? "Create Account" : "Welcome Back"}
