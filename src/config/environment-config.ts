@@ -23,19 +23,28 @@ const configs: Record<Environment, EnvironmentConfig> = {
 
 // Define the current environment
 export const getCurrentEnvironment = (): Environment => {
-  // Check for forced environment in development (e.g., for testing)
-  const forcedEnv = localStorage.getItem('FORCE_ENVIRONMENT') as Environment;
-  if (forcedEnv && ['development', 'production'].includes(forcedEnv)) {
-    console.log(`Forced environment: ${forcedEnv}`);
-    return forcedEnv;
+  // Check for forced environment in localStorage (case insensitive)
+  const forcedEnv = localStorage.getItem('FORCE_ENVIRONMENT');
+  
+  if (forcedEnv) {
+    // Convert to lowercase for case-insensitive comparison
+    const normalizedEnv = forcedEnv.toLowerCase();
+    
+    if (normalizedEnv === 'development' || normalizedEnv === 'production') {
+      const validEnv = normalizedEnv as Environment;
+      console.log(`Using forced environment from localStorage: ${validEnv}`);
+      return validEnv;
+    } else {
+      console.warn(`Invalid forced environment value: ${forcedEnv}. Using auto-detection instead.`);
+    }
   }
 
-  // Check if we're in production based on the hostname
+  // If no valid forced environment, check if we're in production based on the hostname
   const isProduction = window.location.hostname.includes('lovable.app') || 
                        window.location.hostname.includes('izypximwilmpxdyotfra.supabase.co') ||
                        window.location.hostname === 'production-app-domain.com';
   
-  console.log(`Current environment detected as: ${isProduction ? 'production' : 'development'}`);
+  console.log(`Current environment auto-detected as: ${isProduction ? 'production' : 'development'}`);
   return isProduction ? 'production' : 'development';
 };
 
