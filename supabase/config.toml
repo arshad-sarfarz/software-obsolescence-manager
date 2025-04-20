@@ -1,1 +1,6 @@
+
+# Project ID from your current environment
 project_id = "cfncqjzmjhixnmmhmxeq"
+
+[functions.get-env-value]
+verify_jwt = true
