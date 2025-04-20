@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { getCurrentEnvironment } from "@/config/environment-config";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -14,32 +15,57 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [envInfo, setEnvInfo] = useState({ env: '', url: '' });
   const navigate = useNavigate();
+
+  // Get environment info for debugging
+  useEffect(() => {
+    const env = getCurrentEnvironment();
+    const config = supabase.auth.getSession();
+    
+    setEnvInfo({
+      env: env,
+      url: window.location.hostname
+    });
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      console.log("Auth attempt in environment:", envInfo.env);
+      
       if (isSignUp) {
+        console.log("Starting sign up with email:", email);
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            // Adding a redirect to to ensure proper URL handling in production
+            emailRedirectTo: `${window.location.origin}/`
+          }
         });
+        
         if (error) throw error;
+        
         toast({
           title: "Success",
           description: "Please check your email to verify your account",
         });
       } else {
+        console.log("Starting sign in with email:", email);
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+        
         if (error) throw error;
+        
         navigate("/");
       }
     } catch (error) {
+      console.error("Auth error:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -138,6 +164,14 @@ export default function Auth() {
                 {isSignUp ? "Sign In" : "Create Account"}
               </button>
             </div>
+            
+            {/* Small environment indicator for debugging - only visible in development */}
+            {process.env.NODE_ENV !== 'production' && (
+              <div className="text-xs text-muted-foreground pt-4 border-t mt-4">
+                <p>Environment: {envInfo.env}</p>
+                <p>Host: {envInfo.url}</p>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>

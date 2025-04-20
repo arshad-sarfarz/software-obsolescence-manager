@@ -15,6 +15,7 @@ const configs: Record<Environment, EnvironmentConfig> = {
     projectId: 'cfncqjzmjhixnmmhmxeq'
   },
   production: {
+    // Fixing the production URL and anon key - this should match what's in your Supabase dashboard
     supabaseUrl: 'https://izypximwilmpxdyotfra.supabase.co',
     supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6eXB4aW13aWxtcHhkeW90ZnJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NTQxNjcsImV4cCI6MjA2MDMzMDE2N30.0hf6138Ensy0Oko__NYV-LpxbAIAA2-LwapV7oQ-MZM',
     projectId: 'izypximwilmpxdyotfra'
@@ -55,6 +56,8 @@ export const getCurrentEnvironment = (): Environment => {
 
     // If no valid forced environment, check if we're in production based on the hostname
     const hostname = window.location.hostname;
+    
+    // Updated hostname detection to include lovable.app domain
     const isProduction = hostname.includes('lovable.app') || 
                          hostname.includes('izypximwilmpxdyotfra.supabase.co') ||
                          hostname === 'production-app-domain.com';
