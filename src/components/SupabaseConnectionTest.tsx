@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentEnvironment } from '@/config/environment-config';
@@ -28,28 +27,17 @@ export function SupabaseConnectionTest() {
       const config = getEnvironmentConfig();
       setProjectId(config.projectId);
       
-      // Try to fetch the project ref from Supabase
-      const { data, error: fetchError } = await supabase.rpc('get_project_ref');
-      
-      if (fetchError) {
-        // If the function doesn't exist, let's try a simple query instead
-        const { data: serverData, error: serverError } = await supabase
-          .from('servers')
-          .select('count(*)', { count: 'exact', head: true });
-          
-        if (serverError) {
-          throw serverError;
-        }
+      // Try to fetch using a simple query instead of RPC
+      const { data: serverData, error: serverError } = await supabase
+        .from('servers')
+        .select('count(*)', { count: 'exact', head: true });
         
-        // If we got here, the connection works
-        setConnectionSuccess(true);
-      } else {
-        setConnectionSuccess(true);
-        // Use the data from RPC if available
-        if (data) {
-          setProjectId(data);
-        }
+      if (serverError) {
+        throw serverError;
       }
+      
+      // If we got here, the connection works
+      setConnectionSuccess(true);
     } catch (err: any) {
       console.error('Supabase connection test failed:', err);
       setConnectionSuccess(false);
