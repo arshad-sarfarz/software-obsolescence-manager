@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { getEnvironmentConfig } from '@/config/environment-config';
 
 export function SupabaseConnectionTest() {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,6 +24,10 @@ export function SupabaseConnectionTest() {
       const env = getCurrentEnvironment();
       setEnvironment(env);
       
+      // Get project ID from configuration rather than trying to parse it from URL
+      const config = getEnvironmentConfig();
+      setProjectId(config.projectId);
+      
       // Try to fetch the project ref from Supabase
       const { data, error: fetchError } = await supabase.rpc('get_project_ref');
       
@@ -38,14 +43,12 @@ export function SupabaseConnectionTest() {
         
         // If we got here, the connection works
         setConnectionSuccess(true);
-        // Extract project ID from the URL since getUrl() doesn't exist
-        const projectIdFromUrl = supabase.supabaseUrl.split('https://')[1].split('.')[0];
-        setProjectId(projectIdFromUrl);
       } else {
         setConnectionSuccess(true);
-        // If we got data from the RPC function, use that, otherwise extract from URL
-        const projectIdFromUrl = supabase.supabaseUrl.split('https://')[1].split('.')[0];
-        setProjectId(data || projectIdFromUrl);
+        // Use the data from RPC if available
+        if (data) {
+          setProjectId(data);
+        }
       }
     } catch (err: any) {
       console.error('Supabase connection test failed:', err);
