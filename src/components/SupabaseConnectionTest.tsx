@@ -38,12 +38,18 @@ export function SupabaseConnectionTest() {
         
         // If we got here, the connection works
         setConnectionSuccess(true);
-        setProjectId(supabase.supabaseUrl.split('//')[1].split('.')[0]);
+        // Extract project ID from the URL instead of accessing protected property
+        const url = new URL(supabase.getUrl());
+        const projectIdFromUrl = url.hostname.split('.')[0];
+        setProjectId(projectIdFromUrl);
       } else {
         setConnectionSuccess(true);
-        setProjectId(data || supabase.supabaseUrl.split('//')[1].split('.')[0]);
+        // If we got data from the RPC function, use that, otherwise extract from URL
+        const url = new URL(supabase.getUrl());
+        const projectIdFromUrl = url.hostname.split('.')[0];
+        setProjectId(data || projectIdFromUrl);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Supabase connection test failed:', err);
       setConnectionSuccess(false);
       setError(err.message || 'Unknown error occurred');
