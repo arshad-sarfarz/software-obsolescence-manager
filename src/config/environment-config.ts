@@ -1,4 +1,3 @@
-
 // Environment configuration for the application
 export type Environment = 'development' | 'production';
 
@@ -25,6 +24,9 @@ const configs: Record<Environment, EnvironmentConfig> = {
 export const getCurrentEnvironment = (): Environment => {
   // Check for forced environment in localStorage (case insensitive)
   const forcedEnv = localStorage.getItem('FORCE_ENVIRONMENT');
+  
+  // Log the current value of FORCE_ENVIRONMENT
+  console.log('Current FORCE_ENVIRONMENT value:', forcedEnv);
   
   if (forcedEnv) {
     // Convert to lowercase for case-insensitive comparison
