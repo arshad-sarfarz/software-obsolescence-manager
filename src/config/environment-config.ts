@@ -23,13 +23,20 @@ const configs: Record<Environment, EnvironmentConfig> = {
 
 // Define the current environment
 export const getCurrentEnvironment = (): Environment => {
-  // In a real production environment, this would be set by your deployment platform
-  // For now, we'll consider it development unless explicitly set to production
-  return window.location.hostname.includes('lovable.app') ? 'production' : 'development';
+  // Check if we're in production based on the hostname
+  const isProduction = window.location.hostname.includes('lovable.app') || 
+                       window.location.hostname.includes('izypximwilmpxdyotfra.supabase.co') ||
+                       window.location.hostname === 'production-app-domain.com'; // Replace with your actual production domain if applicable
+  
+  console.log(`Current environment detected as: ${isProduction ? 'production' : 'development'}`);
+  return isProduction ? 'production' : 'development';
 };
 
 // Get the configuration for the current environment
 export const getEnvironmentConfig = (): EnvironmentConfig => {
   const environment = getCurrentEnvironment();
+  console.log(`Using Supabase configuration for: ${environment}`);
+  console.log(`Project ID: ${configs[environment].projectId}`);
+  console.log(`Supabase URL: ${configs[environment].supabaseUrl}`);
   return configs[environment];
 };
