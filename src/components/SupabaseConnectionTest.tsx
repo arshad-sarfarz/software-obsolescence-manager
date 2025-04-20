@@ -38,15 +38,13 @@ export function SupabaseConnectionTest() {
         
         // If we got here, the connection works
         setConnectionSuccess(true);
-        // Extract project ID from the URL instead of accessing protected property
-        const url = new URL(supabase.getUrl());
-        const projectIdFromUrl = url.hostname.split('.')[0];
+        // Extract project ID from the URL since getUrl() doesn't exist
+        const projectIdFromUrl = supabase.supabaseUrl.split('https://')[1].split('.')[0];
         setProjectId(projectIdFromUrl);
       } else {
         setConnectionSuccess(true);
         // If we got data from the RPC function, use that, otherwise extract from URL
-        const url = new URL(supabase.getUrl());
-        const projectIdFromUrl = url.hostname.split('.')[0];
+        const projectIdFromUrl = supabase.supabaseUrl.split('https://')[1].split('.')[0];
         setProjectId(data || projectIdFromUrl);
       }
     } catch (err: any) {
