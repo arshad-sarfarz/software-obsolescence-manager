@@ -1,3 +1,4 @@
+
 // Environment configuration for the application
 export type Environment = 'development' | 'production';
 
@@ -20,34 +21,52 @@ const configs: Record<Environment, EnvironmentConfig> = {
   }
 };
 
+// Function to directly access localStorage with error handling
+const getLocalStorageItem = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.error('Error accessing localStorage:', error);
+    return null;
+  }
+};
+
 // Define the current environment
 export const getCurrentEnvironment = (): Environment => {
-  // Check for forced environment in localStorage (case insensitive)
-  const forcedEnv = localStorage.getItem('FORCE_ENVIRONMENT');
-  
-  // Log the current value of FORCE_ENVIRONMENT
-  console.log('Current FORCE_ENVIRONMENT value:', forcedEnv);
-  
-  if (forcedEnv) {
-    // Convert to lowercase for case-insensitive comparison
-    const normalizedEnv = forcedEnv.toLowerCase();
+  try {
+    // Check for forced environment in localStorage (case insensitive)
+    const forcedEnv = getLocalStorageItem('FORCE_ENVIRONMENT');
     
-    if (normalizedEnv === 'development' || normalizedEnv === 'production') {
-      const validEnv = normalizedEnv as Environment;
-      console.log(`Using forced environment from localStorage: ${validEnv}`);
-      return validEnv;
-    } else {
-      console.warn(`Invalid forced environment value: ${forcedEnv}. Using auto-detection instead.`);
+    // Log the current value of FORCE_ENVIRONMENT
+    console.log('Current FORCE_ENVIRONMENT value:', forcedEnv);
+    
+    if (forcedEnv) {
+      // Convert to lowercase for case-insensitive comparison
+      const normalizedEnv = forcedEnv.toLowerCase();
+      
+      if (normalizedEnv === 'development' || normalizedEnv === 'production') {
+        const validEnv = normalizedEnv as Environment;
+        console.log(`Using forced environment from localStorage: ${validEnv}`);
+        return validEnv;
+      } else {
+        console.warn(`Invalid forced environment value: ${forcedEnv}. Using auto-detection instead.`);
+      }
     }
-  }
 
-  // If no valid forced environment, check if we're in production based on the hostname
-  const isProduction = window.location.hostname.includes('lovable.app') || 
-                       window.location.hostname.includes('izypximwilmpxdyotfra.supabase.co') ||
-                       window.location.hostname === 'production-app-domain.com';
-  
-  console.log(`Current environment auto-detected as: ${isProduction ? 'production' : 'development'}`);
-  return isProduction ? 'production' : 'development';
+    // If no valid forced environment, check if we're in production based on the hostname
+    const hostname = window.location.hostname;
+    const isProduction = hostname.includes('lovable.app') || 
+                         hostname.includes('izypximwilmpxdyotfra.supabase.co') ||
+                         hostname === 'production-app-domain.com';
+    
+    console.log(`Current environment auto-detected as: ${isProduction ? 'production' : 'development'}`);
+    console.log(`Hostname: ${hostname}`);
+    return isProduction ? 'production' : 'development';
+  } catch (error) {
+    console.error('Error determining environment:', error);
+    // Default to development in case of any errors
+    return 'development';
+  }
 };
 
 // Get the configuration for the current environment

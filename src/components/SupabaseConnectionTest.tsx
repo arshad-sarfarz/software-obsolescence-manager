@@ -5,7 +5,7 @@ import { getCurrentEnvironment } from '@/config/environment-config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw, AlertTriangle } from 'lucide-react';
 import { getEnvironmentConfig } from '@/config/environment-config';
 
 export function SupabaseConnectionTest() {
@@ -15,12 +15,16 @@ export function SupabaseConnectionTest() {
   const [environment, setEnvironment] = useState<string>('');
   const [projectId, setProjectId] = useState<string>('');
   const [forcedEnv, setForcedEnv] = useState<string | null>(null);
+  const [hostname, setHostname] = useState<string>('');
 
   const testConnection = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
+      // Set hostname for debugging
+      setHostname(window.location.hostname);
+      
       // Check if environment is forced
       const storedForcedEnv = localStorage.getItem('FORCE_ENVIRONMENT');
       setForcedEnv(storedForcedEnv);
@@ -57,7 +61,27 @@ export function SupabaseConnectionTest() {
   const toggleEnvironment = () => {
     const currentEnv = getCurrentEnvironment();
     const newEnv = currentEnv === 'development' ? 'production' : 'development';
-    localStorage.setItem('FORCE_ENVIRONMENT', newEnv);
+    
+    // Update localStorage
+    try {
+      localStorage.setItem('FORCE_ENVIRONMENT', newEnv);
+      console.log(`Set FORCE_ENVIRONMENT to: ${newEnv}`);
+    } catch (error) {
+      console.error('Error setting localStorage:', error);
+    }
+    
+    // Reload the page to apply changes
+    window.location.reload();
+  };
+
+  // Set environment to a specific value
+  const setEnvironmentTo = (env: string) => {
+    try {
+      localStorage.setItem('FORCE_ENVIRONMENT', env);
+      console.log(`Set FORCE_ENVIRONMENT to: ${env}`);
+    } catch (error) {
+      console.error('Error setting localStorage:', error);
+    }
     
     // Reload the page to apply changes
     window.location.reload();
@@ -65,7 +89,13 @@ export function SupabaseConnectionTest() {
 
   // Clear forced environment
   const clearForcedEnvironment = () => {
-    localStorage.removeItem('FORCE_ENVIRONMENT');
+    try {
+      localStorage.removeItem('FORCE_ENVIRONMENT');
+      console.log('Cleared FORCE_ENVIRONMENT from localStorage');
+    } catch (error) {
+      console.error('Error removing from localStorage:', error);
+    }
+    
     // Reload the page to apply changes
     window.location.reload();
   };
@@ -90,59 +120,69 @@ export function SupabaseConnectionTest() {
           </div>
         ) : (
           <div className="space-y-4">
-            {forcedEnv && (
-              <Alert className="bg-blue-50 border-blue-200">
-                <AlertTitle className="text-blue-800">Environment Override</AlertTitle>
-                <AlertDescription className="text-blue-700">
-                  <p>Environment forced via localStorage: <strong>{forcedEnv}</strong></p>
-                  <Button 
-                    onClick={clearForcedEnvironment} 
-                    className="mt-2 bg-blue-600 hover:bg-blue-700"
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertTitle className="text-blue-800">Environment Information</AlertTitle>
+              <AlertDescription className="text-blue-700 space-y-1">
+                <p>Current Hostname: <strong>{hostname}</strong></p>
+                <p>Environment: <strong>{environment}</strong></p>
+                <p>Forced Environment: <strong>{forcedEnv || 'None (auto-detected)'}</strong></p>
+                <p>Project ID: <strong>{projectId}</strong></p>
+                
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <Button
+                    onClick={() => setEnvironmentTo('development')}
+                    className="bg-blue-600 hover:bg-blue-700"
+                    size="sm"
+                    variant={environment === 'development' ? 'default' : 'outline'}
+                  >
+                    Set to Development
+                  </Button>
+                  <Button
+                    onClick={() => setEnvironmentTo('production')}
+                    className="bg-blue-600 hover:bg-blue-700"
+                    size="sm"
+                    variant={environment === 'production' ? 'default' : 'outline'}
+                  >
+                    Set to Production
+                  </Button>
+                  {forcedEnv && (
+                    <Button
+                      onClick={clearForcedEnvironment}
+                      className="bg-gray-600 hover:bg-gray-700"
+                      size="sm"
+                    >
+                      Clear Forced Environment
+                    </Button>
+                  )}
+                  <Button
+                    onClick={testConnection}
+                    className="bg-green-600 hover:bg-green-700"
                     size="sm"
                   >
-                    Clear Forced Environment
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Refresh Status
                   </Button>
-                </AlertDescription>
-              </Alert>
-            )}
+                </div>
+              </AlertDescription>
+            </Alert>
             
             {connectionSuccess ? (
               <Alert className="bg-green-50 border-green-200">
                 <AlertTitle className="text-green-800">Connection Successful</AlertTitle>
                 <AlertDescription className="text-green-700">
-                  <p>Connected to Supabase in <strong>{environment}</strong> environment</p>
-                  <p>Project ID: <strong>{projectId}</strong></p>
-                  <Button 
-                    onClick={toggleEnvironment} 
-                    className="mt-2 bg-green-600 hover:bg-green-700"
-                    size="sm"
-                  >
-                    Switch to {environment === 'development' ? 'Production' : 'Development'}
-                  </Button>
+                  <p>Successfully connected to Supabase</p>
                 </AlertDescription>
               </Alert>
             ) : (
               <Alert className="bg-red-50 border-red-200">
-                <AlertTitle className="text-red-800">Connection Failed</AlertTitle>
+                <AlertTitle className="text-red-800">
+                  <div className="flex items-center">
+                    <AlertTriangle className="h-5 w-5 mr-2" />
+                    Connection Failed
+                  </div>
+                </AlertTitle>
                 <AlertDescription className="text-red-700">
                   <p>Error: {error}</p>
-                  <p>Current environment: <strong>{environment}</strong></p>
-                  <div className="flex gap-2 mt-2">
-                    <Button 
-                      onClick={testConnection} 
-                      className="bg-red-600 hover:bg-red-700"
-                      size="sm"
-                    >
-                      Retry Connection
-                    </Button>
-                    <Button 
-                      onClick={toggleEnvironment} 
-                      className="bg-red-600 hover:bg-red-700"
-                      size="sm"
-                    >
-                      Switch to {environment === 'development' ? 'Production' : 'Development'}
-                    </Button>
-                  </div>
                 </AlertDescription>
               </Alert>
             )}
