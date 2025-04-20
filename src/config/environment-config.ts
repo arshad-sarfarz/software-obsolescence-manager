@@ -17,7 +17,7 @@ const configs: Record<Environment, EnvironmentConfig> = {
   production: {
     // Fixing the production URL and anon key - this should match what's in your Supabase dashboard
     supabaseUrl: 'https://izypximwilmpxdyotfra.supabase.co',
-    supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6eXB4aW13aWxtcHhkeW90ZnJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NTQxNjcsImV4cCI6MjA2MDMzMDE2N30.0hf6138Ensy0Oko__NYV-LpxbAIAA2-LwapV7oQ-MZM',
+    supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6eXB4aW13aWxtcHhkeW90ZnJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUxNzI3MjUsImV4cCI6MjA2MDc0ODcyNX0.hr85kRR1vSUwAYVq_mYH8RU73rRK3oaUdWuKdNR3Q1A',
     projectId: 'izypximwilmpxdyotfra'
   }
 };
