@@ -54,17 +54,10 @@ export const getCurrentEnvironment = (): Environment => {
       }
     }
 
-    // If no valid forced environment, check if we're in production based on the hostname
-    const hostname = window.location.hostname;
-    
-    // Updated hostname detection to include lovable.app domain
-    const isProduction = hostname.includes('lovable.app') || 
-                         hostname.includes('izypximwilmpxdyotfra.supabase.co') ||
-                         hostname === 'production-app-domain.com';
-    
-    console.log(`Current environment auto-detected as: ${isProduction ? 'production' : 'development'}`);
-    console.log(`Hostname: ${hostname}`);
-    return isProduction ? 'production' : 'development';
+    // If no valid forced environment, always default to development regardless of hostname
+    // This is the change - removed the hostname detection logic and always return 'development'
+    console.log('No forced environment set, defaulting to development');
+    return 'development';
   } catch (error) {
     console.error('Error determining environment:', error);
     // Default to development in case of any errors
@@ -80,3 +73,4 @@ export const getEnvironmentConfig = (): EnvironmentConfig => {
   console.log(`Supabase URL: ${configs[environment].supabaseUrl}`);
   return configs[environment];
 };
+
